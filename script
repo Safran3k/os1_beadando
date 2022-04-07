@@ -1,0 +1,63 @@
+#!/bin/bash
+
+sajat(){
+ curl ipinfo.io -o response.json --silent
+ echo "Saját IP adatop letöltve."
+}
+
+kiirat(){
+ if [ ! -f response.json ]
+ then
+  echo "Nem létezik a response.json fájl!"
+  exit 1
+ fi
+ cat response.json | jq
+}
+
+szures(){
+ if [ ! -f response.json ]
+ then
+  echo "Nem létezik a response.json fájl!"
+  exit 1
+ fi
+ ip=$(cat response.json | jq .ip | tr -d "\"")
+ hostname=$(cat response.json | jq .hostname | tr -d "\"")
+ echo "IP: $ip"
+ echo "Hostname: $hostname"
+}
+
+masik(){
+ curl ipinfo.io/$1 -o response.json --silent
+ echo "Adatok a(z) $1 címről letöltve!"
+}
+
+
+
+while getopts :skmo: PARAM
+do
+ case $PARAM in
+  o)
+   ip_cim=$OPTARG
+   masik $ip_cim
+   ;;
+  s)
+   sajat
+   ;;
+  k)
+   kiirat
+   ;;
+  m)
+   szures
+   ;;
+  :)
+  echo "-$OPTARG vár értéket!"
+  exit 1
+  ;;
+  *)
+   echo "Érvénytelen paraméter!"
+   exit 1
+   ;;
+  esac
+done
+shift $(($OPTIND - 1))
+
